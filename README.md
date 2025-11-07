@@ -144,13 +144,16 @@ GROUP BY transport_id, transport_mode
 
 **Task 2. How has monthly revenue changed over the past 12 months for each mode?**
 ```sql
-SELECT    transport_id, transport_mode, SUM(price_usd) 
+SELECT 
+    DATE_TRUNC('month', BI.booking_date) AS month,
+    TA.transport_mode,
+    SUM(BI.total_fare_usd) AS monthly_revenue
 FROM trips_all_modes TA 
 JOIN bookings_information BI
 ON TA.trip_id = BI.trip_id
 WHERE BI.booking_date >= CURRENT_DATE - INTERVAL '12 months' and
 BI.booking_status ='Confirmed'
-GROUP BY transport_id, transport_mode;
+GROUP BY month, transport_mode;
 ```
 
 **Task 3. What are the top 5 routes generating the highest profit margins?**
@@ -282,9 +285,26 @@ FROM (
 ) AS summary;
 ```
 
-
-
-
+**Task 10. What is the average ticket price per customer segment (age, gender, nationality)?**
+```sql
+SELECT
+	 	Case
+		     WHEN age BETWEEN 0 AND 17 THEN 'Under-18'
+		     WHEN age BETWEEN 18 AND 25 THEN 'Yong'
+			 WHEN age BETWEEN 26 AND 50 THEN 'Middle AGE'
+			 ELSE 'Senior Citizen' 
+			 END AS age_group,
+		     gender,
+			 nationality,
+			 AVG(BI.total_fare_usd)
+FROM passengers_information PI
+INNER JOIN
+bookings_information BI
+ON 
+PI.passenger_id = BI.passenger_id
+GROUP BY gender,age_group, nationality
+ORDER BY nationality;
+```
 
 
 
